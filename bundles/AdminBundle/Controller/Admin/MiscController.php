@@ -29,6 +29,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Templating\EngineInterface;
 
 /**
  * @Route("/misc")
@@ -764,6 +765,105 @@ class MiscController extends AdminController
         if ($profiler) {
             $profiler->disable();
         }
+    }
+
+
+    /**
+     * @Route("/generate-opcache-preload-script", methods={"POST"})
+     *
+     * @param Request $request
+     * @param EngineInterface $templatingEngine
+     *
+     * @return JsonResponse
+     */
+    public function generateOpcachePreloadScriptAction(Request $request, EngineInterface $templatingEngine)
+    {
+        $this->checkPermission('opcache_preload_script');
+
+        $cacheDir = $this->container->getParameter('kernel.cache_dir');
+        $memoryLimitMB = $request->get('memory_limit', 64);
+        $memoryLimit = $memoryLimitMB * 1024 * 1024;
+
+        $status = opcache_get_status(true);
+        $scripts = $status['scripts'];
+        usort($scripts, function ($a, $b) {
+            if ($a['hits'] == $b['hits']) {
+                return 0;
+            }
+
+            return ($a['hits'] > $b['hits']) ? -1 : 1;
+        });
+
+        // filter project related scripts
+        $scripts = array_filter($scripts, function ($script) use ($cacheDir) {
+
+            $excludedPatterns = [
+                '@^' . preg_quote(PIMCORE_CACHE_DIRECTORY, '@') . '@',
+                '@^' . preg_quote(PIMCORE_SYMFONY_CACHE_DIRECTORY, '@') . '@',
+                '@^' . preg_quote(PIMCORE_WEB_ROOT, '@') . '@',
+                '@^' . preg_quote($cacheDir, '@') . '@',
+                '@^' . preg_quote(PIMCORE_CLASS_DIRECTORY, '@') . '.*definition_(.*).php$@',
+                '@^' . preg_quote(PIMCORE_CLASS_DIRECTORY, '@') . '.*(customlayouts|fieldcollections|objectbricks)@',
+                '@amnuts/opcache-gui@',
+                '@Twig/Extensions/Extension/Text.php$@',
+            ];
+
+            foreach($excludedPatterns as $excludedPattern) {
+                if(preg_match($excludedPattern, $script['full_path'])) {
+                    return false;
+                }
+            }
+
+            // no views
+            if(strpos($script['full_path'], '/Resources/views/')) {
+                return false;
+            }
+
+            // only project related files
+            $allowedPaths = [PIMCORE_COMPOSER_PATH, PIMCORE_PATH,
+                PIMCORE_PRIVATE_VAR, PIMCORE_CLASS_DIRECTORY, PIMCORE_SYSTEM_TEMP_DIRECTORY,
+                PIMCORE_PROJECT_ROOT];
+
+            foreach($allowedPaths as $allowedPath) {
+                if(strpos($script['full_path'], $allowedPath) === 0) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+
+        $memoryUsed = 0;
+        $scriptPaths = [];
+
+        foreach($scripts as $script) {
+            if($memoryUsed > $memoryLimit) {
+                break;
+            }
+
+            $scriptPaths[] = $script['full_path'];
+            $memoryUsed += $script['memory_consumption'];
+        }
+
+
+        $containerClass = $this->container->getParameter('kernel.container_class');
+        $environment = $this->container->getParameter('kernel.environment');
+
+        $symfonyPreloadScriptPath = $cacheDir . '/' . $containerClass . '.preload.php';
+        if(!file_exists($symfonyPreloadScriptPath)) {
+            $symfonyPreloadScriptPath = null;
+        }
+
+        $preloadScriptContents = $templatingEngine->render('@PimcoreAdmin/opcachePreload.php.twig', [
+            'symfonyPreloadScriptPath' => $symfonyPreloadScriptPath,
+            'scripts' => var_export_pretty($scriptPaths),
+        ]);
+
+        $preloadScriptPath = PIMCORE_CACHE_DIRECTORY . '/preload.' . $environment . '.php';
+        File::put($preloadScriptPath, $preloadScriptContents);
+
+
+        return $this->adminJson(['success' => true, 'path' => $preloadScriptPath]);
     }
 
     /**

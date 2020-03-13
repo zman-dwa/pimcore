@@ -1899,3 +1899,7 @@
 .pimcore_icon_share {
     background: url(/bundles/pimcoreadmin/img/flat-white-icons/share.svg) center center no-repeat;
 }
+
+.pimcore_icon_opcache_preload_script {
+    background: url(/bundles/pimcoreadmin/img/flat-white-icons/sales_performance.svg) center center no-repeat;
+}

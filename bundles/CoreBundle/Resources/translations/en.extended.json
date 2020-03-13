@@ -17,6 +17,8 @@
   "login_screen": "Login Screen",
   "color_description": "Use the HTML hex format, eg. #ffffff",
   "colors": "Colors",
+  "generate_opcache_preload_script": "Generate OPcache Preload Script",
+  "memory_limit": "Memory Limit",
   "media": "Media",
   "custom_logo": "Custom Logo",
   "custom_login_background_image": "Custom Login Background Image",

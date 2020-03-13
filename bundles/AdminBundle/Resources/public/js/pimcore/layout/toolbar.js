@@ -457,6 +457,16 @@ pimcore.layout.toolbar = Class.create({
                         );
                     }
 
+                    if (perspectiveCfg.inToolbar("extras.systemtools.opcache_preload_generator")) {
+                        systemItems.push(
+                            {
+                                text: t("generate_opcache_preload_script"),
+                                iconCls: "pimcore_icon_opcache_preload_script",
+                                handler: this.showOpcachePreloadScript
+                            }
+                        );
+                    }
+
                     extrasItems.push({
                         text: t("system_infos_and_tools"),
                         iconCls: "pimcore_nav_icon_info",
@@ -1673,6 +1683,56 @@ pimcore.layout.toolbar = Class.create({
         catch (e) {
             pimcore.globalmanager.add("fileexplorer", new pimcore.settings.fileexplorer.explorer());
         }
+    },
+
+    showOpcachePreloadScript: function () {
+
+        var win = null;
+        win = new Ext.Window({
+            title: t("generate_opcache_preload_script"),
+            width: 500,
+            modal: true,
+            bodyStyle: 'padding: 10px',
+            items: [{
+                xtype: 'form',
+                itemId: 'opcache_form',
+                items: [{
+                    xtype: 'textfield',
+                    name: 'memory_limit',
+                    value: '64',
+                    fieldLabel: t('memory_limit') + ' (MB)',
+                    labelWidth: 150,
+                    width: 200
+                }]
+            }],
+            buttons: ['->', {
+                text: t('OK'),
+                handler: function () {
+                    let form = win.getComponent('opcache_form');
+                    if(form) {
+                        win.mask();
+                        let params = form.getForm().getFieldValues();
+                        Ext.Ajax.request({
+                            url: "/admin/misc/generate-opcache-preload-script",
+                            params: params,
+                            method: 'post',
+                            success: function (response) {
+                                var response = Ext.decode(response.responseText);
+                                if (response.success) {
+                                    win.removeAll();
+                                    win.update(response['path']);
+                                    win.unmask();
+                                }
+                            }
+                        });
+                    } else {
+                        win.close();
+                    }
+                }
+            }]
+        });
+
+        win.show();
     },
 
     showMaintenance: function () {

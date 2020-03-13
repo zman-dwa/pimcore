@@ -1,0 +1,14 @@
+<?php
+
+{%  if symfonyPreloadScriptPath %}
+//require_once '{{ symfonyPreloadScriptPath }}';
+{% endif %}
+
+$scripts = {{ scripts|raw }};
+
+foreach($scripts as $scriptPath) {
+    if(file_exists($scriptPath)) {
+        @require_once($scriptPath);
+    }
+}
+
