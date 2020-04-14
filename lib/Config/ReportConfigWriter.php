@@ -49,7 +49,8 @@ class ReportConfigWriter
 
         File::putPhpFile(
             $this->getConfigFile(),
-            to_php_data_file_format($settings)
+            to_php_data_file_format($settings),
+            0775
         );
     }
 

@@ -59,7 +59,8 @@ class Config
 
         File::putPhpFile(
             $this->locateConfigFile(),
-            to_php_data_file_format($config->toArray())
+            to_php_data_file_format($config->toArray()),
+            0775
         );
     }
 

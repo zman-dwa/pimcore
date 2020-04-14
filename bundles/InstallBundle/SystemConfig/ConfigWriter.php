@@ -167,7 +167,7 @@ class ConfigWriter
 
         $configFile = \Pimcore\Config::locateConfigFile('system.yml');
         $settingsYml = Yaml::dump($settings, 5);
-        File::put($configFile, $settingsYml);
+        File::put($configFile, $settingsYml, 0775);
     }
 
     public function writeDbConfig(array $config = [])
@@ -175,7 +175,7 @@ class ConfigWriter
         if (count($config)) {
             $content = Yaml::dump($config);
             $configFile = PIMCORE_APP_ROOT.'/config/local/database.yml';
-            File::put($configFile, $content);
+            File::put($configFile, $content. 0775);
         }
     }
 
@@ -185,7 +185,7 @@ class ConfigWriter
             'active' => true,
             'ip' => '',
             'devmode' => false,
-        ]));
+        ]), 0775);
     }
 
     public function generateParametersFile(string $secret = null)
@@ -203,6 +203,6 @@ class ConfigWriter
         $parameters = file_get_contents(PIMCORE_APP_ROOT . '/config/parameters.example.yml');
         $parameters = str_replace('ThisTokenIsNotSoSecretChangeIt', $secret, $parameters);
 
-        File::put($parametersFilePath, $parameters);
+        File::put($parametersFilePath, $parameters, 0775);
     }
 }

@@ -141,7 +141,7 @@ class Dashboard
         }
 
         $this->dashboards[$key] = $configuration;
-        File::put($this->getConfigFile(), Serialize::serialize($this->dashboards));
+        File::put($this->getConfigFile(), Serialize::serialize($this->dashboards), 0775);
     }
 
     /**
@@ -151,7 +151,7 @@ class Dashboard
     {
         $this->loadFile();
         unset($this->dashboards[$key]);
-        File::put($this->getConfigFile(), Serialize::serialize($this->dashboards));
+        File::put($this->getConfigFile(), Serialize::serialize($this->dashboards), 0775);
     }
 
     /**
