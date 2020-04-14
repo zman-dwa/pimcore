@@ -156,7 +156,7 @@ class File
      *
      * @return bool
      */
-    public static function mkdir($path, $mode = null, $recursive = true)
+    public static function mkdir($path, $mode = 0775, $recursive = true)
     {
         if (is_dir($path)) {
             return true;
