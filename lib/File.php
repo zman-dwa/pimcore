@@ -117,7 +117,7 @@ class File
     /**
      * @param string $path
      * @param mixed $data
-     * @param int $mode
+     * @param int|null $mode
      *
      * @return int
      */
@@ -138,7 +138,7 @@ class File
     /**
      * @param string $path
      * @param mixed $data
-     * @param int $mode
+     * @param int|null $mode
      */
     public static function putPhpFile($path, $data, $mode = null)
     {
