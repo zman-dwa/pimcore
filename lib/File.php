@@ -117,17 +117,20 @@ class File
     /**
      * @param string $path
      * @param mixed $data
+     * @param int $mode
      *
      * @return int
      */
-    public static function put($path, $data)
+    public static function put($path, $data, $mode = null)
     {
+        $mode = $mode ?? self::$defaultMode;
+
         if (!is_dir(dirname($path))) {
             self::mkdir(dirname($path));
         }
 
         $return = file_put_contents($path, $data, null, self::getContext());
-        @chmod($path, self::$defaultMode);
+        @chmod($path, $mode);
 
         return $return;
     }
@@ -135,10 +138,11 @@ class File
     /**
      * @param string $path
      * @param mixed $data
+     * @param int $mode
      */
-    public static function putPhpFile($path, $data)
+    public static function putPhpFile($path, $data, $mode = null)
     {
-        self::put($path, $data);
+        self::put($path, $data, $mode);
 
         if (function_exists('opcache_reset')) {
             opcache_reset();

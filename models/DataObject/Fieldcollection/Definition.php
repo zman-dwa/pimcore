@@ -170,7 +170,7 @@ class Definition extends Model\AbstractModel
 
             $data .= "\nreturn " . $exportedClass . ";\n";
 
-            \Pimcore\File::put($definitionFile, $data);
+            \Pimcore\File::put($definitionFile, $data, 0775);
         }
 
         $extendClass = 'DataObject\\Fieldcollection\\Data\\AbstractData';
@@ -229,7 +229,7 @@ class Definition extends Model\AbstractModel
         $cd .= "}\n";
         $cd .= "\n";
 
-        File::put($this->getPhpClassFile(), $cd);
+        File::put($this->getPhpClassFile(), $cd, 0775);
     }
 
     public function delete()

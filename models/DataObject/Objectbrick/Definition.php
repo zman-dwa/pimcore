@@ -217,7 +217,7 @@ class Definition extends Model\DataObject\Fieldcollection\Definition
 
             $data .= "\nreturn " . $exportedClass . ";\n";
 
-            \Pimcore\File::put($definitionFile, $data);
+            \Pimcore\File::put($definitionFile, $data, 0775);
         }
 
         $extendClass = 'DataObject\\Objectbrick\\Data\\AbstractData';
@@ -292,7 +292,7 @@ class Definition extends Model\DataObject\Fieldcollection\Definition
         $cd .= "}\n";
         $cd .= "\n";
 
-        File::putPhpFile($this->getPhpClassFile(), $cd);
+        File::putPhpFile($this->getPhpClassFile(), $cd, 0775);
     }
 
     /**
@@ -559,7 +559,7 @@ class Definition extends Model\DataObject\Fieldcollection\Definition
                 }
 
                 $file = $folder . '/' . ucfirst($fieldname) . '.php';
-                File::put($file, $cd);
+                File::put($file, $cd, 0775);
             }
         }
     }

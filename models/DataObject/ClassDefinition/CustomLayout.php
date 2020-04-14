@@ -249,7 +249,7 @@ class CustomLayout extends Model\AbstractModel
         if ($saveDefinitionFile) {
             $data = to_php_data_file_format($clone, $infoDocBlock);
 
-            \Pimcore\File::putPhpFile($definitionFile, $data);
+            \Pimcore\File::putPhpFile($definitionFile, $data, 0775);
         }
     }
 
